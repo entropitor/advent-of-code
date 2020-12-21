@@ -36,10 +36,9 @@ let testInput = seq {
   675
   1456
 }
-(* A *)
-main 2020 2 testInput = Found 514579
-(* B *)
-main 2020 3 testInput = Found 241861950
+
+assertEqual (testInput |> main 2020 2) (Found 514579)
+assertEqual (testInput |> main 2020 3) (Found 241861950)
 
 (* Real *)
 let realInput = inputLines |> Seq.map int

@@ -36,8 +36,8 @@ let checkB (parsed: Parsed) =
 
 let main check = Seq.map parse >> Seq.filter check >> Seq.length
 
-testInput |> main check
-testInput |> main checkB
+assertEqual (testInput |> main check) 2
+assertEqual (testInput |> main checkB) 1
 
 (* A *)
 (* inputLines |> main check |> printfn "%A" *)
