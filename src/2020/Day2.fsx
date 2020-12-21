@@ -1,3 +1,5 @@
+#load "shared.fsx"
+open Shared
 open System
 
 type Parsed = {
@@ -36,10 +38,6 @@ let main check = Seq.map parse >> Seq.filter check >> Seq.length
 
 testInput |> main check
 testInput |> main checkB
-
-let read _ = Console.ReadLine()
-let isValid x = x <> null
-let inputLines = Seq.initInfinite read |> Seq.takeWhile isValid
 
 (* A *)
 (* inputLines |> main check |> printfn "%A" *)

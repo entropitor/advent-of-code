@@ -1,3 +1,5 @@
+#load "shared.fsx"
+open Shared
 open System
 
 type Result =
@@ -40,9 +42,6 @@ main 2020 2 testInput = Found 514579
 main 2020 3 testInput = Found 241861950
 
 (* Real *)
-let read _ = Console.ReadLine()
-let isValid x = x <> null
-let inputLines = Seq.initInfinite read |> Seq.takeWhile isValid
 let realInput = inputLines |> Seq.map int
 
 (* A *)

@@ -7,6 +7,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="shared.fsx" />
+
     <Compile Include="Day1.fsx" />
     <Compile Include="Day2.fsx" />
   </ItemGroup>
