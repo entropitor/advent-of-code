@@ -44,6 +44,6 @@ assertEqual (testInput |> main 2020 3) (Found 241861950)
 let realInput = inputLines |> Seq.map int
 
 (* A *)
-main 2020 2 realInput |> printf "%A"
+main 2020 2 realInput |> printfn "%A"
 (* B *)
-main 2020 3 realInput |> printf "%A"
+main 2020 3 realInput |> printfn "%A"
