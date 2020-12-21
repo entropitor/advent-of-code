@@ -2,6 +2,12 @@
 open Shared
 open System
 
+let testInput = seq {
+  "1-3 a: abcde"
+  "1-3 b: cdefg"
+  "2-9 c: ccccccccc"
+}
+
 type Parsed = {
   Min: int;
   Max: int;
@@ -17,11 +23,6 @@ let parse (str: String) =
     Letter = parts.[1] |> Seq.head;
     Input = parts.[2];
   }
-let testInput = seq {
-  "1-3 a: abcde"
-  "1-3 b: cdefg"
-  "2-9 c: ccccccccc"
-}
 
 let check (parsed: Parsed) =
   let isLetter x = x = parsed.Letter
@@ -36,10 +37,9 @@ let checkB (parsed: Parsed) =
 
 let main check = Seq.map parse >> Seq.filter check >> Seq.length
 
-assertEqual (testInput |> main check) 2
-assertEqual (testInput |> main checkB) 1
-
 (* A *)
-(* inputLines |> main check |> printfn "%A" *)
+assertEqual (testInput |> main check) 2
+inputLines |> main check |> printfn "%A"
 (* B *)
+assertEqual (testInput |> main checkB) 1
 inputLines |> main checkB |> printfn "%A"

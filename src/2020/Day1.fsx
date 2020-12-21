@@ -2,6 +2,17 @@
 open Shared
 open System
 
+let testInput = seq {
+  1721
+  979
+  366
+  299
+  675
+  1456
+}
+
+let parse = int
+
 type Result =
   | Found of int
   (* Key: total so far  + nb values used for it
@@ -28,22 +39,11 @@ let main goal amountOfNumbers lines =
   let result = lines |> Seq.fold folder (NotFound Map.empty)
   result
 
-let testInput = seq {
-  1721
-  979
-  366
-  299
-  675
-  1456
-}
-
-assertEqual (testInput |> main 2020 2) (Found 514579)
-assertEqual (testInput |> main 2020 3) (Found 241861950)
-
-(* Real *)
-let realInput = inputLines |> Seq.map int
+let realInput = inputLines |> Seq.map parse
 
 (* A *)
+assertEqual (testInput |> main 2020 2) (Found 514579)
 main 2020 2 realInput |> printfn "%A"
 (* B *)
+assertEqual (testInput |> main 2020 3) (Found 241861950)
 main 2020 3 realInput |> printfn "%A"

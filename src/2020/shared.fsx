@@ -1,9 +1,11 @@
 open System
 
 let inputLines =
-  let read _ = Console.ReadLine()
-  let isValid x = x <> null
-  Seq.initInfinite read |> Seq.takeWhile isValid
+  let lines = 
+    let read _ = Console.ReadLine()
+    let isValid x = x <> null
+    Seq.initInfinite read |> Seq.takeWhile isValid
+  Seq.cache lines
 
 let assertEqual value expected =
   if value = expected then
