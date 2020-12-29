@@ -33,42 +33,36 @@ let parse lines =
 
     lines |> Seq.map parse
 
-let evaluate pc acc instruction count =
-    let (pc, acc) =
-        match instruction with
-        | Acc diffAcc -> (pc + 1, acc + diffAcc)
-        | Jump diffPc -> (pc + diffPc, acc)
-        | Nop _ -> (pc + 1, acc)
+let evaluate pc acc instruction =
+    match instruction with
+    | Acc diffAcc -> (pc + 1, acc + diffAcc)
+    | Jump diffPc -> (pc + diffPc, acc)
+    | Nop _ -> (pc + 1, acc)
 
-    (pc % count, acc)
+type ProgramResult =
+    | Loop of int
+    | Ended of int
 
-let accumulatorBeforeRepeat lines =
-    let program = parse lines
+let detectLoop pc acc program =
+    let length = Seq.length program
 
     let rec loop seenPcs pc acc =
-        let (pc, acc) =
-            evaluate pc acc (Seq.item pc program) (Seq.length program)
+        let instruction = Seq.item pc program
+        let (pc, acc) = evaluate pc acc instruction
 
-        if Set.contains pc seenPcs then acc else loop (Set.add pc seenPcs) pc acc
+        if Set.contains pc seenPcs then Loop acc
+        else if pc = length then Ended acc
+        else loop (Set.add pc seenPcs) pc acc
 
-    loop Set.empty 0 0
+    if pc = length then Ended acc else loop Set.empty pc acc
 
-let safe program =
-    let newPcs =
-        program
-        |> Seq.mapi (fun i instruction ->
-            evaluate i 0 instruction (Seq.length program)
-            |> fst)
-        |> Array.ofSeq
+let mainSimple lines = lines |> parse |> detectLoop 0 0
 
-    let rec safePositions safe =
-        let safe' =
-            safe
-            |> Array.map (fun newPc -> if Array.item newPc safe = 0 then 0 else newPc)
-
-        if safe' = safe then safe else safePositions safe'
-
-    safePositions newPcs |> Array.map (fun x -> x = 0)
+let isFixable =
+    function
+    | Acc _ -> false
+    | Nop _ -> true
+    | Jump _ -> true
 
 let fixInstruction =
     function
@@ -76,42 +70,88 @@ let fixInstruction =
     | Jump _ -> Nop 0
     | Nop x -> Jump x
 
-let accumulatorBeforeFixedEnd lines =
-    let program = parse lines
-    let safe = safe program
-    let length = Seq.length program
 
-    let rec run changed pc acc =
+let mainComplex lines =
+    let program = parse lines
+
+    let rec loop (pc, acc) =
         let instruction = Seq.item pc program
 
-        if changed then
-            if pc = 0 then
-                acc
-            else
-                let (pc, acc) = evaluate pc acc instruction length
-                run true pc acc
+        let otherwise () = evaluate pc acc instruction |> loop
+
+        if isFixable instruction then
+            let (pc, acc) =
+                evaluate pc acc (fixInstruction instruction)
+
+            match detectLoop pc acc program with
+            | Ended acc -> acc
+            | Loop _ -> otherwise ()
         else
-            let (newPc, newAcc) =
-                evaluate pc acc (fixInstruction instruction) length
+            otherwise ()
 
-            if Array.item newPc safe then
-                run true newPc newAcc
-            else
-                let (pc, acc) =
-                    evaluate pc acc (Seq.item pc program) (Seq.length program)
+    loop (0, 0)
 
-                run false pc acc
+(* let safe program = *)
+(*     let length = Seq.length program *)
 
-    run false 0 0
+(*     let newPcs = *)
+(*         program *)
+(*         |> Seq.mapi (fun i instruction -> evaluate i 0 instruction |> fst) *)
+(*         |> Array.ofSeq *)
+
+(*     let rec safePositions safe = *)
+(*         let safe' = *)
+(*             safe *)
+(*             |> Array.map (fun newPc -> *)
+(*                 if newPc = length || Array.item newPc safe = length *)
+(*                 then length *)
+(*                 else newPc) *)
+
+(*         if safe' = safe then safe else safePositions safe' *)
+
+(*     safePositions newPcs *)
+(*     |> Array.map (fun x -> x = length) *)
+
+(* let accumulatorBeforeFixedEnd lines = *)
+(*     let program = parse lines *)
+(*     let safe = safe program *)
+(*     let length = Seq.length program *)
+
+(*     let rec run changed pc acc = *)
+
+(*         if changed && pc = length then *)
+(*             acc *)
+(*         else *)
+(*             let instruction = Seq.item pc program *)
+
+(*             if changed then *)
+(*                 let (pc, acc) = evaluate pc acc instruction *)
+(*                 run true pc acc *)
+(*             else *)
+(*                 let (newPc, newAcc) = *)
+(*                     evaluate pc acc (fixInstruction instruction) *)
+
+(*                 if Array.item newPc safe then *)
+(*                     run true newPc newAcc *)
+(*                 else *)
+(*                     let (pc, acc) = evaluate pc acc (Seq.item pc program) *)
+
+(*                     run false pc acc *)
+
+(*     run false 0 0 *)
 
 
 (* A *)
-assertEqual 5 (accumulatorBeforeRepeat lines)
+assertEqual (Loop 5) (mainSimple lines)
 
-accumulatorBeforeRepeat inputLines |> printfn "%A"
+inputLines |> mainSimple |> printfn "%A"
 
 (* B *)
-assertEqual 8 (accumulatorBeforeFixedEnd lines)
+(* assertEqual 8 (accumulatorBeforeFixedEnd lines) *)
 
-accumulatorBeforeFixedEnd inputLines
-|> printfn "%A"
+(* accumulatorBeforeFixedEnd inputLines *)
+(* |> printfn "%A" *)
+
+assertEqual 8 (mainComplex lines)
+
+mainComplex inputLines |> printfn "%A"
