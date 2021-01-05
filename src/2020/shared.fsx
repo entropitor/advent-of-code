@@ -12,3 +12,5 @@ let assertEqual value expected =
     if value = expected
     then ()
     else failwith (sprintf "Expected %A to equal %A" value expected)
+
+let split (str: string) = str.Split("\n")
